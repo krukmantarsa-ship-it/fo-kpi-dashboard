@@ -10,10 +10,10 @@ def render_kpi_cards(
     avg_score: float,
     team_label: str,
 ):
-    """Render Overall Score + KPI cards in a 2-row grid.
+    """Render Overall Score (left, tall) + 2×3 KPI grid (right).
 
-    Row 1: [Overall Score (tall, colored)] [FRT] [AHT] [Volume]
-    Row 2:                                 [ASAT] [QA]  [CPH]
+    [Overall Score]  [Volume] [FRT]  [AHT]
+    [  (spans 2)  ]  [CPH]   [ASAT] [QA]
     """
     pct = avg_score * 100
     if pct >= 70:
@@ -27,52 +27,56 @@ def render_kpi_cards(
         bg = "linear-gradient(135deg, #ef444422, #dc262611)"
 
     row1_kpis = [
+        ("Volume", "", ",.0f"),
         ("FRT", " min", ".2f"),
         ("AHT", " min", ".2f"),
-        ("Volume", "", ",.0f"),
     ]
     row2_kpis = [
+        ("CPH", "/hr", ".2f"),
         ("ASAT", "/5", ".2f"),
         ("QA", "", ".0%"),
-        ("CPH", "/hr", ".2f"),
     ]
 
-    # Row 1: Overall Score (spans 2 rows visually) + FRT + AHT + Volume
-    cols1 = st.columns(4)
-    with cols1[0]:
+    col_score, col_kpis = st.columns([1, 3])
+
+    with col_score:
         st.markdown(
             f"""<div style="
                 background: {bg};
                 border: 2px solid {color}66;
                 border-radius: 12px;
-                padding: 1.2rem 1rem;
+                padding: 1.5rem 1rem;
                 text-align: center;
-                min-height: 160px;
+                min-height: 185px;
                 display: flex;
                 flex-direction: column;
                 justify-content: center;
             ">
                 <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 0.5rem;
                             text-transform: uppercase; letter-spacing: 0.05em;">
-                    {team_label} Overall Score
+                    Overall Score
                 </div>
-                <div style="font-size: 3rem; font-weight: 800; color: {color};
+                <div style="font-size: 3.2rem; font-weight: 800; color: {color};
                             line-height: 1;">
                     {pct:.1f}%
+                </div>
+                <div style="font-size: 0.75rem; color: #64748b; margin-top: 0.4rem;">
+                    {team_label}
                 </div>
             </div>""",
             unsafe_allow_html=True,
         )
 
-    for col, (kpi, suffix, fmt) in zip(cols1[1:], row1_kpis):
-        val = df[kpi].sum() if kpi == "Volume" else df[kpi].mean()
-        val = val if not df.empty else 0
-        display = f"{val:{fmt}}{suffix}" if val is not None else "N/A"
-        col.metric(label=kpi, value=display)
+    with col_kpis:
+        r1 = st.columns(3)
+        for col, (kpi, suffix, fmt) in zip(r1, row1_kpis):
+            val = df[kpi].sum() if kpi == "Volume" else df[kpi].mean()
+            val = val if not df.empty else 0
+            display = f"{val:{fmt}}{suffix}" if val is not None else "N/A"
+            col.metric(label=kpi, value=display)
 
-    # Row 2: (spacer under score card) + ASAT + QA + CPH
-    cols2 = st.columns(4)
-    for col, (kpi, suffix, fmt) in zip(cols2[1:], row2_kpis):
-        val = df[kpi].mean() if not df.empty else 0
-        display = f"{val:{fmt}}{suffix}" if val is not None else "N/A"
-        col.metric(label=kpi, value=display)
+        r2 = st.columns(3)
+        for col, (kpi, suffix, fmt) in zip(r2, row2_kpis):
+            val = df[kpi].mean() if not df.empty else 0
+            display = f"{val:{fmt}}{suffix}" if val is not None else "N/A"
+            col.metric(label=kpi, value=display)
