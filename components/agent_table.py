@@ -109,11 +109,6 @@ def render_agent_detail(df: pd.DataFrame, selected_agent: str):
             key=f"training_{selected_agent}",
             height=80,
         )
-        vert = st.text_input(
-            "Verticalization",
-            value=r.get("verticalization", ""),
-            key=f"vert_{selected_agent}",
-        )
 
     st.divider()
 
@@ -144,7 +139,6 @@ def render_agent_detail(df: pd.DataFrame, selected_agent: str):
 
     return {
         "training_focus": training,
-        "verticalization": vert,
         "qa_topics": qa_topics,
         "asat_topics": asat_topics,
     }

@@ -68,20 +68,29 @@ def weighted_breakdown_chart(df: pd.DataFrame, agent_name: str):
     values = [float(row[c].iloc[0]) * 100 for c in weighted_cols]
 
     fig = go.Figure()
-    for kpi, val in zip(kpis, values):
+    for i, (kpi, val) in enumerate(zip(kpis, values)):
         fig.add_trace(go.Bar(
-            name=kpi, x=[val], y=[agent_name],
+            name=f"{kpi} ({val:.1f}%)",
+            x=[val], y=["Score"],
             orientation="h",
-            text=f"{val:.1f}%",
+            text=f"{kpi}" if val >= 5 else "",
             textposition="inside",
+            textfont=dict(size=11),
+            marker_color=COLOR_PALETTE[i % len(COLOR_PALETTE)],
         ))
 
     fig.update_layout(barmode="stack", title=f"Score Breakdown: {agent_name}")
-    _base_layout(fig, height=120)
+    _base_layout(fig, height=180)
     fig.update_layout(
         xaxis=dict(range=[0, 105], title="Weighted Contribution (%)"),
         yaxis_title="",
+        yaxis=dict(visible=False),
         showlegend=True,
+        legend=dict(
+            orientation="h", y=-0.35, x=0.5, xanchor="center",
+            font=dict(size=11),
+        ),
+        margin=dict(l=10, r=20, t=40, b=60),
     )
     st.plotly_chart(fig, width="stretch")
 

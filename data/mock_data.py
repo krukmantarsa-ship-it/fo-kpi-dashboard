@@ -18,6 +18,7 @@ import random
 import pandas as pd
 from datetime import date, timedelta
 from data.agent_mapping import get_all_agents
+from data.topics_data import get_asat_topics, get_qa_topics
 
 
 # Seeded for reproducibility but agent-specific offsets give variety
@@ -119,9 +120,8 @@ def generate_agent_data(
             "team": agent["team"],
             "parent_team": agent["parent_team"],
             "training_focus": "",
-            "verticalization": "",
-            "qa_topics": "",
-            "asat_topics": "",
+            "qa_topics": get_qa_topics(agent["display"]),
+            "asat_topics": get_asat_topics(agent["display"]),
             **kpis,
         })
 
