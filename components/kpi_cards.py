@@ -1,4 +1,4 @@
-"""KPI summary cards rendered as Streamlit metric columns."""
+"""KPI summary cards rendered as Streamlit metric columns (v2)."""
 
 from __future__ import annotations
 import streamlit as st
