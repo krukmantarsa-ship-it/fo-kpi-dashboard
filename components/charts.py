@@ -57,11 +57,13 @@ def score_ranking_chart(df: pd.DataFrame):
 
 
 def weighted_breakdown_chart(df: pd.DataFrame, agent_name: str):
-    """Stacked bar showing weighted KPI contribution for one agent."""
+    """Vertical bar chart showing weighted KPI contribution for one agent."""
     row = df[df["agent"] == agent_name]
     if row.empty:
         st.info("Select an agent to view breakdown.")
         return
+
+    st.markdown(f"**Score Breakdown: {agent_name}**")
 
     weighted_cols = [c for c in df.columns if c.endswith("_weighted")]
     kpis = [c.replace("_weighted", "") for c in weighted_cols]
@@ -70,27 +72,26 @@ def weighted_breakdown_chart(df: pd.DataFrame, agent_name: str):
     fig = go.Figure()
     for i, (kpi, val) in enumerate(zip(kpis, values)):
         fig.add_trace(go.Bar(
-            name=f"{kpi} ({val:.1f}%)",
-            x=[val], y=["Score"],
-            orientation="h",
-            text=f"{kpi}" if val >= 5 else "",
-            textposition="inside",
-            textfont=dict(size=11),
+            name=kpi,
+            x=[kpi], y=[val],
+            text=f"{val:.1f}%",
+            textposition="outside",
+            textfont=dict(size=12),
             marker_color=COLOR_PALETTE[i % len(COLOR_PALETTE)],
         ))
 
-    fig.update_layout(barmode="stack", title=f"Score Breakdown: {agent_name}")
-    _base_layout(fig, height=180)
+    total = sum(values)
+    _base_layout(fig, height=350)
     fig.update_layout(
-        xaxis=dict(range=[0, 105], title="Weighted Contribution (%)"),
-        yaxis_title="",
-        yaxis=dict(visible=False),
-        showlegend=True,
-        legend=dict(
-            orientation="h", y=-0.35, x=0.5, xanchor="center",
-            font=dict(size=11),
-        ),
-        margin=dict(l=10, r=20, t=40, b=60),
+        yaxis=dict(range=[0, max(35, max(values) * 1.25)], title="Contribution (%)"),
+        xaxis_title="",
+        showlegend=False,
+        margin=dict(l=40, r=20, t=10, b=40),
+        annotations=[dict(
+            x=0.5, y=1.02, xref="paper", yref="paper",
+            text=f"Total: {total:.1f}%",
+            showarrow=False, font=dict(size=14, color="#94a3b8"),
+        )],
     )
     st.plotly_chart(fig, width="stretch")
 

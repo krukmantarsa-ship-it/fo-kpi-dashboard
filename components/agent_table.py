@@ -102,43 +102,48 @@ def render_agent_detail(df: pd.DataFrame, selected_agent: str):
                 )
 
     with col2:
-        st.markdown("#### Manual Fields")
+        st.markdown("#### Training Focus")
         training = st.text_area(
             "Training Focus",
             value=r.get("training_focus", ""),
             key=f"training_{selected_agent}",
             height=80,
+            label_visibility="collapsed",
         )
 
     st.divider()
 
     qa_col, asat_col = st.columns(2)
+
+    qa_text = r.get("qa_topics", "")
+    asat_text = r.get("asat_topics", "")
+
     with qa_col:
         st.markdown("#### QA Improvement Topics")
-        st.caption("Areas to improve Quality Assurance score")
-        qa_topics = st.text_area(
-            "QA topics",
-            value=r.get("qa_topics", ""),
-            key=f"qa_topics_{selected_agent}",
-            height=120,
-            placeholder="e.g.\n- Greeting & closing script adherence\n- Accurate issue categorisation\n- Follow-up completeness",
-            label_visibility="collapsed",
-        )
+        st.caption("From coaching sessions file — areas to improve")
+        if qa_text:
+            st.markdown(
+                f"<div style='background:#1e293b; border:1px solid #334155; "
+                f"border-radius:8px; padding:12px; font-size:0.9rem; "
+                f"white-space:pre-wrap; line-height:1.6;'>{qa_text}</div>",
+                unsafe_allow_html=True,
+            )
+        else:
+            st.info("No coaching data available for this agent.", icon="📋")
 
     with asat_col:
         st.markdown("#### ASAT Improvement Topics")
-        st.caption("Areas to improve Agent Satisfaction rating")
-        asat_topics = st.text_area(
-            "ASAT topics",
-            value=r.get("asat_topics", ""),
-            key=f"asat_topics_{selected_agent}",
-            height=120,
-            placeholder="e.g.\n- Empathy & tone of voice\n- Faster resolution communication\n- Proactive follow-up",
-            label_visibility="collapsed",
-        )
+        st.caption("From Snowflake — top 3 lowest-rated topic categories")
+        if asat_text:
+            st.markdown(
+                f"<div style='background:#1e293b; border:1px solid #334155; "
+                f"border-radius:8px; padding:12px; font-size:0.9rem; "
+                f"white-space:pre-wrap; line-height:1.6;'>{asat_text}</div>",
+                unsafe_allow_html=True,
+            )
+        else:
+            st.info("No ASAT topic data available for this agent.", icon="📊")
 
     return {
         "training_focus": training,
-        "qa_topics": qa_topics,
-        "asat_topics": asat_topics,
     }

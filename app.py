@@ -14,7 +14,7 @@ from data.mock_data import generate_agent_data, generate_daily_chart_data
 from data.scoring import score_all_agents, DEFAULT_WEIGHTS, DEFAULT_TARGETS
 from data.agent_mapping import TEAM_SME_VERU, TEAM_SME_ADHI, TEAM_RETAIL
 from components.filters import render_filters, render_weight_editor
-from components.kpi_cards import render_score_card
+from components.kpi_cards import render_kpi_cards
 from components.agent_table import render_ranking_table, render_agent_detail
 from components.charts import (
     score_ranking_chart,
@@ -119,46 +119,9 @@ st.caption(
     f"Data source: EMART_CC.CHAT_TOUCH (mock)"
 )
 
-# ── Row 1: KPI summary (row 1) + Overall Score (center) + KPI summary (row 2)
+# ── Row 1: Overall Score (first card) + KPI summary ──────────────────
 avg_score = scored_df["score_total"].mean() if not scored_df.empty else 0
-
-kpi_row1 = [
-    ("FRT", " min", ".2f"),
-    ("AHT", " min", ".2f"),
-]
-kpi_row2 = [
-    ("CPH", "/hr", ".2f"),
-    ("ASAT", "/5", ".2f"),
-]
-kpi_row3 = [
-    ("Volume", "", ",.0f"),
-    ("QA", "", ".0%"),
-]
-
-col_left, col_center, col_right = st.columns([2, 1, 2])
-
-with col_left:
-    c1, c2 = st.columns(2)
-    for col, (kpi, suffix, fmt) in zip([c1, c2], kpi_row1):
-        val = scored_df[kpi].mean() if not scored_df.empty else 0
-        display = f"{val:{fmt}}{suffix}" if val is not None else "N/A"
-        col.metric(label=kpi, value=display)
-    c3, c4 = st.columns(2)
-    for col, (kpi, suffix, fmt) in zip([c3, c4], kpi_row2):
-        val = scored_df[kpi].mean() if not scored_df.empty else 0
-        display = f"{val:{fmt}}{suffix}" if val is not None else "N/A"
-        col.metric(label=kpi, value=display)
-
-with col_center:
-    render_score_card(avg_score, team_label)
-
-with col_right:
-    c5, c6 = st.columns(2)
-    for col, (kpi, suffix, fmt) in zip([c5, c6], kpi_row3):
-        val = scored_df[kpi].sum() if kpi == "Volume" else scored_df[kpi].mean()
-        val = val if not scored_df.empty else 0
-        display = f"{val:{fmt}}{suffix}" if val is not None else "N/A"
-        col.metric(label=kpi, value=display)
+render_kpi_cards(scored_df, avg_score, team_label)
 
 
 # ── Row 2: Ranking table ─────────────────────────────────────────────
@@ -216,7 +179,7 @@ selected_agent = st.selectbox(
 )
 
 if selected_agent:
-    col_detail, col_chart = st.columns([1, 1])
+    col_detail, col_chart = st.columns([3, 2])
 
     with col_detail:
         manual = render_agent_detail(scored_df, selected_agent)
